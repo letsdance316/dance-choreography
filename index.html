@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Test</title>
+    <!-- p5.js Library (local file) -->
+    <script src="p5.js"></script>
+    <!-- p5.sound.js Library (local file) -->
+    <script src="p5.sound.min.js"></script>
+</head>
+<body>
+    <h1>Test Audio Playback</h1>
+    <!-- File upload input for audio -->
+    <input type="file" id="fileInput" accept="audio/*">
+    <!-- Play button (hidden until sound is loaded) -->
+    <button id="playButton" style="display: none;">Play</button>
+
+    <script>
+        let song;
+        let playButton = document.getElementById("playButton");
+
+        // p5.js setup function
+        function setup() {
+            // Log to confirm p5.js is loaded
+            console.log("p5.js setup() called.");
+            noCanvas();  // We don't need a canvas for this test
+        }
+
+        // Check if p5.sound is available before proceeding
+        window.onload = function() {
+            if (typeof loadSound === "function") {
+                console.log("p5.sound is loaded and ready!");
+            } else {
+                console.error("p5.sound is not loaded. Please check your library files.");
+            }
+        };
+
+        // Handle file upload
+        document.getElementById("fileInput").addEventListener("change", function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file); // Create temporary URL for the audio file
+                console.log("Attempting to load sound from: ", url);
+                song = loadSound(url, () => {
+                    console.log("Sound loaded successfully!");
+                    playButton.style.display = "inline"; // Show play button once the sound is loaded
+                }, () => {
+                    console.error("Failed to load sound.");
+                });
+            }
+        });
+
+        // Handle play/pause functionality
+        playButton.addEventListener("click", function() {
+            if (song && song.isPlaying()) {
+                song.pause();
+                playButton.textContent = "Play";
+            } else if (song) {
+                song.play();
+                playButton.textContent = "Pause";
+            }
+        });
+    </script>
+</body>
+</html>

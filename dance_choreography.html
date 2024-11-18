@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Dance Choreography Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        canvas {
+            margin-top: 20px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+        }
+        input[type="file"] {
+            margin-top: 20px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+<body>
+    <h1>Dance Choreography Tool</h1>
+    <p>Upload a song and choreograph your moves!</p>
+    <input type="file" id="fileInput" accept="audio/*">
+    <br>
+    <canvas id="danceCanvas"></canvas>
+
+    <script>
+        let song;
+        let dancers = [];
+        let playButton;
+        
+        function setup() {
+            createCanvas(600, 400);
+            background(240);
+            playButton = createButton("Play");
+            playButton.position(10, 10);
+            playButton.mousePressed(togglePlay);
+            let input = document.getElementById('fileInput');
+            input.addEventListener('change', handleFileSelect, false);
+        }
+
+        function draw() {
+            background(240);
+
+            // Draw the dancers
+            dancers.forEach(dancer => {
+                dancer.display();
+                dancer.move();
+            });
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    song = loadSound(e.target.result, songLoaded);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function songLoaded() {
+            playButton.show();
+        }
+
+        function togglePlay() {
+            if (song.isPlaying()) {
+                song.pause();
+                playButton.html("Play");
+            } else {
+                song.play();
+                playButton.html("Pause");
+            }
+        }
+
+        // Create a simple dancer class
+        class Dancer {
+            constructor(x, y, radius) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.angle = 0;
+            }
+
+            move() {
+                // Sync movement with the song's current time
+                let beat = song.currentTime(); 
+                this.x = 200 + Math.sin(this.angle) * 100;
+                this.y = 200 + Math.cos(this.angle) * 100;
+                this.angle += 0.1 + (beat % 2) * 0.02; // Some movement variation based on the song time
+            }
+
+            display() {
+                fill(100, 100, 255);
+                ellipse(this.x, this.y, this.radius * 2);
+            }
+        }
+
+        // Add dancers to the stage
+        function keyPressed() {
+            if (key === '1') {
+                dancers.push(new Dancer(200, 200, 20));
+            } else if (key === '2') {
+                dancers.push(new Dancer(400, 200, 20));
+            }
+        }
+    </script>
+</body>
+</html>
